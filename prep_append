@@ -1,0 +1,24 @@
+# Remove clirr plugin
+python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :clirr-maven-plugin
+python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :clirr-maven-plugin aether-api
+python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :clirr-maven-plugin aether-util
+python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :clirr-maven-plugin aether-spi
+
+# Remove animal sniffer 
+for module in aether-api aether-connector-basic aether-impl   \
+              aether-spi aether-test-util aether-transport-file \
+              aether-transport-classpath aether-transport-http  \
+              aether-transport-wagon aether-util; do
+     python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :animal-sniffer-maven-plugin $module
+done
+
+# # HTTP transport tests require Jetty 7 and networking.
+rm -rf aether-transport-http/src/test
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_remove "pom:dependency[pom:scope='test']" aether-transport-http
+
+# This plugin conflicts with necessary packages
+python3 /usr/share/java-utils/pom_editor.py pom_remove_plugin :maven-enforcer-plugin
+
+# # Upstream uses Sisu 0.0.0.M4, but Fedora has 0.0.0.M5.  In M5 scope
+# # of Guice dependency was changed from "compile" to "provided".
+# python3 /usr/share/java-utils/pom_editor.py pom_add_dep com.google.inject:guice::provided . "<classifier>no_aop</classifier>"
